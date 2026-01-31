@@ -35,6 +35,7 @@ import {
     Calendar,
     ChevronDown,
     Database,
+    FileText,
     Globe,
     Heart,
     LayoutDashboard,
@@ -154,6 +155,17 @@ export function AppSidebar() {
           <SidebarGroupLabel>Hệ thống</SidebarGroupLabel>
           <SidebarGroupContent>
             <SidebarMenu>
+              <SidebarMenuItem>
+                <SidebarMenuButton
+                  asChild
+                  isActive={isActive("/dashboard/terms")}
+                >
+                  <Link href="/dashboard/terms">
+                    <FileText className="h-4 w-4" />
+                    <span>Điều khoản</span>
+                  </Link>
+                </SidebarMenuButton>
+              </SidebarMenuItem>
               <SidebarMenuItem>
                 <SidebarMenuButton
                   asChild

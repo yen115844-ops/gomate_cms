@@ -8,6 +8,7 @@ export {
 export { notificationsApi } from "./notifications";
 export { partnersApi } from "./partners";
 export { settingsApi } from "./settings";
+export { termsApi } from "./terms";
 export { statisticsApi } from "./statistics";
 export { usersApi } from "./users";
 

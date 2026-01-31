@@ -532,7 +532,7 @@ export default function KycPage() {
                   <div className="space-y-2">
                     <p className="text-sm">Mặt trước CCCD</p>
                     <div className="aspect-[16/10] overflow-hidden rounded-lg border bg-muted">
-                      {selectedKyc.idCardFrontUrl ? (
+                      {selectedKyc.idCardFrontUrl?.trim() ? (
                         <img
                           src={selectedKyc.idCardFrontUrl}
                           alt="ID Front"
@@ -548,7 +548,7 @@ export default function KycPage() {
                   <div className="space-y-2">
                     <p className="text-sm">Mặt sau CCCD</p>
                     <div className="aspect-[16/10] overflow-hidden rounded-lg border bg-muted">
-                      {selectedKyc.idCardBackUrl ? (
+                      {selectedKyc.idCardBackUrl?.trim() ? (
                         <img
                           src={selectedKyc.idCardBackUrl}
                           alt="ID Back"
@@ -564,7 +564,7 @@ export default function KycPage() {
                   <div className="space-y-2">
                     <p className="text-sm">Ảnh chân dung</p>
                     <div className="aspect-square overflow-hidden rounded-lg border bg-muted">
-                      {selectedKyc.selfieUrl ? (
+                      {selectedKyc.selfieUrl?.trim() ? (
                         <img
                           src={selectedKyc.selfieUrl}
                           alt="Selfie"

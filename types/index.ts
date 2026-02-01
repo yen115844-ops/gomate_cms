@@ -211,9 +211,10 @@ export interface ServiceType {
   id: string;
   code: string;
   name: string;
+  nameVi?: string;
   description?: string;
-  iconUrl?: string;
-  displayOrder: number;
+  icon?: string; // Emoji
+  sortOrder: number;
   isActive: boolean;
 }
 
@@ -325,6 +326,13 @@ export interface Notification {
   };
 }
 
+export interface PushQueueStatus {
+  lastError: string | null;
+  lastErrorAt: string | null;
+  failedCount: number;
+  waitingCount: number;
+}
+
 export interface NotificationStats {
   total: number;
   unread: number;
@@ -336,6 +344,8 @@ export interface NotificationStats {
   today: number;
   thisWeek: number;
   thisMonth: number;
+  /** Push queue status and last error (e.g. production VPS) */
+  pushQueue?: PushQueueStatus;
 }
 
 // ==================== DASHBOARD ====================

@@ -50,9 +50,10 @@ export default function ServiceTypesPage() {
   const [formData, setFormData] = useState({
     code: "",
     name: "",
+    nameVi: "",
     description: "",
-    iconUrl: "",
-    displayOrder: 0,
+    icon: "",
+    sortOrder: 0,
     isActive: true,
   });
 
@@ -110,9 +111,10 @@ export default function ServiceTypesPage() {
     setFormData({
       code: "",
       name: "",
+      nameVi: "",
       description: "",
-      iconUrl: "",
-      displayOrder: serviceTypes.length + 1,
+      icon: "",
+      sortOrder: serviceTypes.length + 1,
       isActive: true,
     });
     setIsFormOpen(true);
@@ -123,19 +125,24 @@ export default function ServiceTypesPage() {
     setFormData({
       code: item.code,
       name: item.name,
+      nameVi: item.nameVi || item.name,
       description: item.description || "",
-      iconUrl: item.iconUrl || "",
-      displayOrder: item.displayOrder,
+      icon: item.icon || "",
+      sortOrder: item.sortOrder,
       isActive: item.isActive,
     });
     setIsFormOpen(true);
   };
 
   const handleSubmit = () => {
+    const payload = {
+      ...formData,
+      nameVi: formData.nameVi || formData.name,
+    };
     if (editingItem) {
-      updateMutation.mutate({ id: editingItem.id, data: formData });
+      updateMutation.mutate({ id: editingItem.id, data: payload });
     } else {
-      createMutation.mutate(formData);
+      createMutation.mutate(payload);
     }
   };
 
@@ -178,7 +185,7 @@ export default function ServiceTypesPage() {
                   <TableHead>Code</TableHead>
                   <TableHead>Name</TableHead>
                   <TableHead>Description</TableHead>
-                  <TableHead className="w-24">Order</TableHead>
+                  <TableHead className="w-24">Sort</TableHead>
                   <TableHead className="w-24">Status</TableHead>
                   <TableHead className="w-24">Actions</TableHead>
                 </TableRow>
@@ -186,13 +193,13 @@ export default function ServiceTypesPage() {
               <TableBody>
                 {serviceTypes.map((item) => (
                   <TableRow key={item.id}>
-                    <TableCell className="text-2xl">{item.iconUrl}</TableCell>
+                    <TableCell className="text-2xl">{item.icon}</TableCell>
                     <TableCell className="font-mono">{item.code}</TableCell>
-                    <TableCell className="font-medium">{item.name}</TableCell>
+                    <TableCell className="font-medium">{item.nameVi || item.name}</TableCell>
                     <TableCell className="text-muted-foreground">
                       {item.description}
                     </TableCell>
-                    <TableCell>{item.displayOrder}</TableCell>
+                    <TableCell>{item.sortOrder}</TableCell>
                     <TableCell>
                       <Badge variant={item.isActive ? "default" : "secondary"}>
                         {item.isActive ? "Hoạt động" : "Ẩn"}
@@ -251,15 +258,26 @@ export default function ServiceTypesPage() {
                 />
               </div>
               <div className="space-y-2">
-                <Label>Name</Label>
+                <Label>Name (EN)</Label>
                 <Input
-                  placeholder="e.g., Walking / Coffee"
+                  placeholder="e.g., Walking"
                   value={formData.name}
                   onChange={(e) =>
                     setFormData({ ...formData, name: e.target.value })
                   }
                 />
               </div>
+            </div>
+
+            <div className="space-y-2">
+              <Label>Tên tiếng Việt</Label>
+              <Input
+                placeholder="e.g., Đi dạo"
+                value={formData.nameVi}
+                onChange={(e) =>
+                  setFormData({ ...formData, nameVi: e.target.value })
+                }
+              />
             </div>
 
             <div className="space-y-2">
@@ -278,21 +296,21 @@ export default function ServiceTypesPage() {
                 <Label>Icon (emoji)</Label>
                 <Input
                   placeholder="e.g., ☕"
-                  value={formData.iconUrl}
+                  value={formData.icon}
                   onChange={(e) =>
-                    setFormData({ ...formData, iconUrl: e.target.value })
+                    setFormData({ ...formData, icon: e.target.value })
                   }
                 />
               </div>
               <div className="space-y-2">
-                <Label>Display Order</Label>
+                <Label>Thứ tự (sortOrder)</Label>
                 <Input
                   type="number"
-                  value={formData.displayOrder}
+                  value={formData.sortOrder}
                   onChange={(e) =>
                     setFormData({
                       ...formData,
-                      displayOrder: parseInt(e.target.value) || 0,
+                      sortOrder: parseInt(e.target.value) || 0,
                     })
                   }
                 />

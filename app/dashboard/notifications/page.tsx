@@ -5,47 +5,47 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
+    Dialog,
+    DialogContent,
+    DialogDescription,
+    DialogFooter,
+    DialogHeader,
+    DialogTitle,
 } from "@/components/ui/dialog";
 import {
-  DropdownMenu,
-  DropdownMenuCheckboxItem,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
+    DropdownMenu,
+    DropdownMenuCheckboxItem,
+    DropdownMenuContent,
+    DropdownMenuItem,
+    DropdownMenuSeparator,
+    DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Pagination } from "@/components/ui/pagination";
+import { ScrollArea } from "@/components/ui/scroll-area";
 import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
+    Select,
+    SelectContent,
+    SelectItem,
+    SelectTrigger,
+    SelectValue,
 } from "@/components/ui/select";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Switch } from "@/components/ui/switch";
 import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
+    Table,
+    TableBody,
+    TableCell,
+    TableHead,
+    TableHeader,
+    TableRow,
 } from "@/components/ui/table";
-import { Pagination } from "@/components/ui/pagination";
-import { ScrollArea } from "@/components/ui/scroll-area";
 import { Textarea } from "@/components/ui/textarea";
 import {
-  GetNotificationsParams,
-  notificationsApi,
-  SendNotificationDto,
+    GetNotificationsParams,
+    notificationsApi,
+    SendNotificationDto,
 } from "@/lib/api/notifications";
 import { usersApi } from "@/lib/api/users";
 import { Notification, NotificationStats, NotificationType, User } from "@/types";
@@ -53,24 +53,35 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { formatDistanceToNow } from "date-fns";
 import { vi } from "date-fns/locale";
 import {
-  Bell,
-  Calendar,
-  CheckCircle2,
-  ChevronDown,
-  Clock,
-  MailCheck,
-  MailX,
-  MessageSquare,
-  MoreHorizontal,
-  Plus,
-  Search,
-  Send,
-  Trash2,
-  Users,
-  XCircle,
+    Bell,
+    Calendar,
+    CheckCircle2,
+    ChevronDown,
+    Clock,
+    MailCheck,
+    MailX,
+    MessageSquare,
+    MoreHorizontal,
+    Plus,
+    Search,
+    Send,
+    Trash2,
+    Users,
+    XCircle,
 } from "lucide-react";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { toast } from "sonner";
+
+const SEARCH_DEBOUNCE_MS = 400;
+
+function useDebouncedValue<T>(value: T, delay: number): T {
+  const [debouncedValue, setDebouncedValue] = useState<T>(value);
+  useEffect(() => {
+    const timer = setTimeout(() => setDebouncedValue(value), delay);
+    return () => clearTimeout(timer);
+  }, [value, delay]);
+  return debouncedValue;
+}
 
 // Notification type badge
 function NotificationTypeBadge({ type }: { type: NotificationType }) {
@@ -160,11 +171,12 @@ function SendNotificationDialog({
   const [selectedUsers, setSelectedUsers] = useState<User[]>([]);
   const [userSearch, setUserSearch] = useState("");
   const [recipientsOpen, setRecipientsOpen] = useState(false);
+  const debouncedSearch = useDebouncedValue(userSearch, SEARCH_DEBOUNCE_MS);
 
-  // Fetch users when recipients dropdown is opened
+  // Fetch users when recipients dropdown is opened, với search đã debounce để tránh gọi API mỗi lần gõ
   const { data: usersData, isLoading: usersLoading } = useQuery({
-    queryKey: ["users-for-recipients", userSearch],
-    queryFn: () => usersApi.getUsers({ search: userSearch || undefined, limit: 100 }),
+    queryKey: ["users-for-recipients", debouncedSearch],
+    queryFn: () => usersApi.getUsers({ search: debouncedSearch.trim() || undefined, limit: 100 }),
     enabled: !isBroadcast && recipientsOpen,
   });
 
@@ -534,6 +546,9 @@ export default function NotificationsPage() {
     thisMonth: 0,
   };
 
+  const pushQueue = notificationStats.pushQueue;
+  const hasPushError = pushQueue?.lastError || (pushQueue?.failedCount ?? 0) > 0;
+
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
@@ -586,6 +601,32 @@ export default function NotificationsPage() {
           </>
         )}
       </div>
+
+      {/* Push queue status / last error (production VPS) */}
+      {!statsLoading && pushQueue && (
+        <Card className={hasPushError ? "border-destructive/50 bg-destructive/5" : "border-muted"}>
+          <CardHeader className="pb-2">
+            <CardTitle className="text-base flex items-center gap-2">
+              <Send className="h-4 w-4" />
+              Trạng thái hàng đợi push
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="pt-0 text-sm text-muted-foreground">
+            <div className="flex flex-wrap gap-4">
+              <span>Đang chờ: {pushQueue.waitingCount}</span>
+              <span>Thất bại: {pushQueue.failedCount}</span>
+              {pushQueue.lastErrorAt && (
+                <span>Lỗi gần nhất: {new Date(pushQueue.lastErrorAt).toLocaleString("vi-VN")}</span>
+              )}
+            </div>
+            {pushQueue.lastError && (
+              <p className="mt-2 rounded-md bg-destructive/10 p-2 font-mono text-destructive text-xs break-all">
+                {pushQueue.lastError}
+              </p>
+            )}
+          </CardContent>
+        </Card>
+      )}
 
       {/* Filters */}
       <Card>
